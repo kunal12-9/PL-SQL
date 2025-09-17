@@ -1,0 +1,32 @@
+oracle 11g data base 
+sql devloper (ide like mys ql workbench)
+
+set serveroutput on;
+declare 
+	var number or int:=10;
+
+begin 
+	var=20;
+ 		
+	dbms_output.put_line("hello_world) <=its use the print 
+
+end;
+
+-- if else use
+set serveroutput on;
+declare 
+	var number or int:=10;
+
+begin 
+	var=20; <=here we change the var value
+ 	if(var>5) then
+			dbms_output.put_line("hey");
+	else      
+		dbms_output.put_line("user");	
+	end if
+	dbms_output.put_line("hello_world)
+	dbms_output.put_line(varr);
+
+end;
+
+-- loop
