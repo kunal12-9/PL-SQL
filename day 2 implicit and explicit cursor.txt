@@ -1,0 +1,107 @@
+select first_name from employees;
+show tables;
+select * from employees;
+select sum(salary) from employees where manager_id=103;
+select  sum(salary) over(),
+sum(salary) over(partition by manager_id order by employee_id)
+from employees;
+
+-- implicit cursor
+create table test1 as 
+select employee_id,first_name,last_name,email,salary from employees;
+set serveroutput on;
+BEGIN
+    update test1
+    set FIRST_NAME = 'yash' 
+    where employee_id between 100 and 104;
+
+    if SQL%FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('Row affected ' || SQL%ROWCOUNT);
+    else
+        DBMS_OUTPUT.PUT_LINE('implicit cursor is not created');
+    end if;
+END;
+/
+
+select * from  test1;
+
+-- explicit cursor 
+-- Create a copy of employees table with only some columns
+CREATE TABLE emp_copy AS
+SELECT employee_id, first_name, last_name, department_id, salary
+FROM employees;
+
+DECLARE
+    -- Cursor declaration on emp_copy table
+    CURSOR emp_cur IS
+        SELECT first_name, employee_id
+        FROM emp_copy;
+
+    -- Variable to hold the cursor row
+    emp_data emp_cur%ROWTYPE;
+
+BEGIN
+    -- Open the cursor
+    OPEN emp_cur;
+
+    -- Fetch the first row
+    FETCH emp_cur INTO emp_data;
+
+    -- Loop until no more rows
+    WHILE emp_cur%FOUND LOOP
+        DBMS_OUTPUT.PUT_LINE(emp_data.first_name || ' ' || emp_data.employee_id);
+
+        -- Fetch next row
+        FETCH emp_cur INTO emp_data;
+    END LOOP;
+
+    -- Close the cursor
+    CLOSE emp_cur;
+END;
+/
+
+-- by for loop
+DECLARE
+    -- 1. Cursor declaration
+    CURSOR emp_cur IS
+        SELECT first_name, employee_id
+        FROM emp_copy;  -- emp_copy table jo CTAS se bana tha
+
+BEGIN
+    -- 2. Cursor FOR LOOP - automatic OPEN, FETCH, CLOSE
+    FOR emp_data IN emp_cur LOOP
+        DBMS_OUTPUT.PUT_LINE(emp_data.first_name || ' - ' || emp_data.employee_id);
+    END LOOP;
+END;
+/
+
+-- while loop threw
+
+DECLARE
+    -- 1. Cursor declaration
+    CURSOR emp_cur IS
+        SELECT first_name, employee_id
+        FROM emp_copy;  -- CTAS se banaya hua table
+
+    -- 2. Variable to hold cursor row
+    emp_data emp_cur%ROWTYPE;
+
+BEGIN
+    -- 3. Open cursor
+    OPEN emp_cur;
+
+    -- 4. Fetch first row
+    FETCH emp_cur INTO emp_data;
+
+    -- 5. Loop until no more rows
+    WHILE emp_cur%FOUND LOOP
+        DBMS_OUTPUT.PUT_LINE(emp_data.first_name || ' - ' || emp_data.employee_id);
+
+        -- Fetch next row
+        FETCH emp_cur INTO emp_data;
+    END LOOP;
+
+    -- 6. Close cursor
+    CLOSE emp_cur;
+END;
+/
