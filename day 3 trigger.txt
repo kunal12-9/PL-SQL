@@ -1,0 +1,120 @@
+select * from employees;
+set serveroutput on;
+
+
+-- Step 1: Create table
+create table emp_cp AS
+select employee_id, first_name from employees
+    where employee_id between 100 and 103;
+
+-- Step 2: Create trigger
+create or replace trigger test1
+before insert on emp_cp
+for each row
+begin
+  DBMS_OUTPUT.PUT_LINE('Calling trigger');
+end;
+/
+
+-- Step 3: Insert rows
+insert into emp_cp values(105,'raj');
+insert into emp_cp values(108,'raj');
+
+-- Step 4: Select data
+select * from emp_cp;
+
+-- 2 statetement level trigger 
+create table audit_statement_log
+(action_type varchar(20),table_name varchar(50),
+action_time timestamp default current_timestamp);
+
+update emp_cp set first_name='xyz'; -- excicute in last
+select * from audit_statement_log;
+
+-- drop trigger log_employee_updates;
+
+create or replace trigger log_employee_updates
+after update on empcp
+-- statement - level triger
+begin 
+    insert into audit_statement_log(action_type,table_name)
+    values('update','emp_cp');
+end;
+/
+select * from emp_cp;
+select * from audit_statement_log;
+
+-- 
+create table employees123(
+emp_id int primary key,
+emp_name varchar(50),
+salary decimal(10,2)
+);
+
+select * from employees123;
+insert into employees123(emp_id,emp_name,salary)
+values(3,'john doe',6000);
+
+create trigger check_salary_before_insert
+before insert on employees
+for each row
+begin 
+    dbms_output.put_line(:new.salary);
+end;
+/
+select * from employees123;
+
+insert into empoloyees123(emp_id,emp_name,salary)
+values(4,'john doe',-500);
+
+create or replace trigger check_salary_before_insert
+before insert on employees123
+for each row
+begin 
+    if :new.salary<0 then 
+        :NEW.SALARY :=0;
+    END IF;
+    
+END;
+/
+select * from employees123;
+
+--
+create table employees456(
+    emp_id int,
+    emp_name varchar(50),
+    deparment varchar(50),
+    salary decimal(10,2)
+);
+select * from employees456;
+create table employee_audit(
+action_type varchar(20),
+emp_id int,
+old_name varchar(50),
+new_name varchar(50),
+old_department varchar(50),
+new_department varchar(50),
+old_salary decimal(10,2),
+new_salary decimal(10,2),
+changed_by varchar(100),
+changed_at timestamp default current_timestamp
+);
+
+CREATE trigger audit_employee_insert
+after insert on employee_audit
+    insert into employee_audit(
+        action_type,emp_id,new_name,new_department,new_salary,
+        changed_by)
+    values('insert',
+        :new.emp_id,
+        :new_emp_name,
+        :new.department,
+        :new.salary,
+        user() -- capture db suer who made change
+        );
+end;
+
+-- 1.create a trigger of audit in csee of update delet or insert 
+-- for each row
+
+-- 2.what is procedure and functions
